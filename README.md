@@ -31,6 +31,5 @@ Return value is one of `SPFCheck::RESULT_PASS`, `SPFCheck::RESULT_FAIL`, `SPFChe
 A few features are missing from this library at the moment. Here's a partial list of those features:
 * [Section 3.2 of RFC7208](https://tools.ietf.org/html/rfc7208#section-3.2) on having multiple SPF records on a domain
 * [Section 3.3 of RFC7208](https://tools.ietf.org/html/rfc7208#section-3.2) on having multiple strings in a single SPF record
-* [Section 4.6.4 of RFC7208](https://tools.ietf.org/html/rfc7208#section-4.6.4) on DNS lookup limits
 * [Section 6.2 of RFC7208](https://tools.ietf.org/html/rfc7208#section-6.2) on the `exp` modifier
 * [Section 7 of RFC7208](https://tools.ietf.org/html/rfc7208#section-7) on macros

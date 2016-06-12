@@ -14,4 +14,6 @@ interface DNSRecordGetterInterface
     public function resolveMx($domain);
     public function resolvePtr($ipAddress);
     public function exists($domain);
+    public function resetRequestCount();
+    public function countRequest();
 }

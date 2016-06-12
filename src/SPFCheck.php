@@ -8,6 +8,7 @@ namespace Mika56\SPFCheck;
 
 
 use Mika56\SPFCheck\Exception\DNSLookupException;
+use Mika56\SPFCheck\Exception\DNSLookupLimitReachedException;
 use Symfony\Component\HttpFoundation\IpUtils;
 
 class SPFCheck
@@ -19,6 +20,7 @@ class SPFCheck
     const RESULT_NONE = 'NO';
     const RESULT_PERMERROR = 'PE';
     const RESULT_TEMPERROR = 'TE';
+    const RESULT_DEFINITIVE_PERMERROR = 'DPE'; // Special result for recursion limit, that cannot be ignored and is transformed to PERMERROR
 
     protected static function getValidResults()
     {
@@ -54,6 +56,18 @@ class SPFCheck
      */
     public function isIPAllowed($ipAddress, $domain)
     {
+        $this->DNSRecordGetter->resetRequestCount();
+
+        $result = $this->doCheck($ipAddress, $domain);
+        if ($result == self::RESULT_DEFINITIVE_PERMERROR) {
+            $result = self::RESULT_PERMERROR;
+        }
+
+        return $result;
+    }
+
+    private function doCheck($ipAddress, $domain)
+    {
         try {
             $spfRecord = $this->DNSRecordGetter->getSPFRecordForDomain($domain);
         } catch (DNSLookupException $e) {
@@ -67,8 +81,12 @@ class SPFCheck
         $recordParts = explode(' ', $spfRecord);
         array_shift($recordParts); // Remove first part (v=spf1)
         foreach ($recordParts as $recordPart) {
-            if (false !== ($result = $this->ipMatchesPart($ipAddress, $recordPart, $domain))) {
-                return $result;
+            try {
+                if (false !== ($result = $this->ipMatchesPart($ipAddress, $recordPart, $domain))) {
+                    return $result;
+                }
+            } catch (DNSLookupLimitReachedException $e) {
+                return self::RESULT_DEFINITIVE_PERMERROR;
             }
         }
 
@@ -121,6 +139,7 @@ class SPFCheck
                 if (!is_null($operandOption)) {
                     $cidr = $operandOption;
                 }
+                $this->DNSRecordGetter->countRequest();
                 $validIpAddresses = $this->DNSRecordGetter->resolveA($domain);
                 if (isset($cidr)) {
                     foreach ($validIpAddresses as &$validIpAddress) {
@@ -143,7 +162,8 @@ class SPFCheck
                 }
 
                 $validIpAddresses = [];
-                $mxServers        = $this->DNSRecordGetter->resolveMx($domain);
+                $this->DNSRecordGetter->countRequest();
+                $mxServers = $this->DNSRecordGetter->resolveMx($domain);
                 foreach ($mxServers as $mxServer) {
                     if (false !== filter_var($mxServer, FILTER_VALIDATE_IP)) {
                         $validIpAddresses[] = $mxServer;
@@ -167,6 +187,7 @@ class SPFCheck
             case self::MECHANISM_PTR:
                 $domain = $operand ? $operand : $matchingDomain;
 
+                $this->DNSRecordGetter->countRequest();
                 $ptrRecords       = $this->DNSRecordGetter->resolvePtr($ipAddress);
                 $validIpAddresses = [];
 
@@ -204,16 +225,18 @@ class SPFCheck
                 break;
 
             case self::MECHANISM_INCLUDE:
-                $includeResult = $this->isIPAllowed($ipAddress, $operand);
-                if ($includeResult == self::RESULT_PASS) {
+                $this->DNSRecordGetter->countRequest();
+                $includeResult = $this->doCheck($ipAddress, $operand);
+                if ($includeResult == self::RESULT_PASS || $includeResult == self::RESULT_DEFINITIVE_PERMERROR) {
                     return $includeResult;
                 }
                 break;
             case self::MODIFIER_REDIRECT:
-                return $this->isIPAllowed($ipAddress, $operand);
+                $this->DNSRecordGetter->countRequest();
+
+                return $this->doCheck($ipAddress, $operand);
                 break;
             default:
-
                 return self::RESULT_PERMERROR;
                 break;
         }

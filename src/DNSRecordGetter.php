@@ -8,11 +8,14 @@ namespace Mika56\SPFCheck;
 
 
 use Mika56\SPFCheck\Exception\DNSLookupException;
+use Mika56\SPFCheck\Exception\DNSLookupLimitReachedException;
 
 class DNSRecordGetter implements DNSRecordGetterInterface
 {
+    protected $requestCount = 0;
+
     /**
-     * @param $domain The domain to get SPF record
+     * @param $domain string The domain to get SPF record
      * @return string|false The SPF record, or false if there is no SPF record
      * @throws DNSLookupException
      */
@@ -82,5 +85,17 @@ class DNSRecordGetter implements DNSRecordGetterInterface
     public function exists($domain)
     {
         return checkdnsrr($domain, 'A');
+    }
+
+    public function resetRequestCount()
+    {
+        $this->requestCount = 0;
+    }
+
+    public function countRequest()
+    {
+        if(++$this->requestCount) {
+            throw new DNSLookupLimitReachedException();
+        }
     }
 }

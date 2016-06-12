@@ -10,7 +10,6 @@ use Mika56\SPFCheck\Exception\DNSLookupException;
 
 class DNSRecordGetterIssue1 implements DNSRecordGetterInterface
 {
-
     protected $spfRecords = [
         'domaina.com' => 'v=spf1 include:domainb.com include:domainc.com -all',
         'domainb.com' => 'v=spf1 -all',
@@ -66,5 +65,13 @@ class DNSRecordGetterIssue1 implements DNSRecordGetterInterface
     public function exists($domain)
     {
         return array_key_exists($domain, $this->aRecords) && count($this->aRecords) > 0;
+    }
+
+    public function resetRequestCount()
+    {
+    }
+
+    public function countRequest()
+    {
     }
 }
