@@ -4,7 +4,7 @@
  * @author Mikael Peigney
  */
 
-namespace Mika56\SPFCheck\Exception;
+namespace PIDI\SPFCheck\Exception;
 
 
 class DNSLookupLimitReachedException extends \Exception

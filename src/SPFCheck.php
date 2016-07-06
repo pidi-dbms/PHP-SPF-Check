@@ -4,11 +4,11 @@
  * @author Mikael Peigney
  */
 
-namespace Mika56\SPFCheck;
+namespace PIDI\SPFCheck;
 
 
-use Mika56\SPFCheck\Exception\DNSLookupException;
-use Mika56\SPFCheck\Exception\DNSLookupLimitReachedException;
+use PIDI\SPFCheck\Exception\DNSLookupException;
+use PIDI\SPFCheck\Exception\DNSLookupLimitReachedException;
 use Symfony\Component\HttpFoundation\IpUtils;
 
 class SPFCheck
