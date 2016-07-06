@@ -81,15 +81,15 @@ class SPFCheck
         $recordParts = explode(' ', $spfRecord);
         array_shift($recordParts); // Remove first part (v=spf1)
         foreach ($recordParts as $recordPart) {
-		if (!empty($recordPart)) {
-            try {
-                if (false !== ($result = $this->ipMatchesPart($ipAddress, $recordPart, $domain))) {
-                    return $result;
+            if (!empty($recordPart)) {
+                try {
+                    if (false !== ($result = $this->ipMatchesPart($ipAddress, $recordPart, $domain))) {
+                        return $result;
+                    }
+                } catch (DNSLookupLimitReachedException $e) {
+                    return self::RESULT_DEFINITIVE_PERMERROR;
                 }
-            } catch (DNSLookupLimitReachedException $e) {
-                return self::RESULT_DEFINITIVE_PERMERROR;
             }
-		}
         }
 
         return self::RESULT_NEUTRAL;

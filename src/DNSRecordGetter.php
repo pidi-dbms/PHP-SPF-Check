@@ -94,7 +94,7 @@ class DNSRecordGetter implements DNSRecordGetterInterface
 
     public function countRequest()
     {
-        if(++$this->requestCount) {
+        if(++$this->requestCount == 10) {
             throw new DNSLookupLimitReachedException();
         }
     }
