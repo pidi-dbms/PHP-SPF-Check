@@ -1,5 +1,5 @@
 {
-    "name": "mika56/spfcheck",
+    "name": "pidi-dbms/PHP-SPF-Check",
     "description": "Checks an IP address against a domain's SPF record",
     "type": "library",
     "require-dev": {
