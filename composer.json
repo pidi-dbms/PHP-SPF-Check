@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Mika56\\SPFCheck\\": "src"
+            "PIDI\\SPFCheck\\": "src"
         }
     },
     "license": "MIT"
