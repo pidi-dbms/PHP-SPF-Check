@@ -62,7 +62,13 @@ class DNSRecordGetter implements DNSRecordGetterInterface
     {
         $records = dns_get_record($domain, DNS_MX);
         if (false === $records || (is_array($records) && empty($records))) {
-            throw new DNSLookupException;
+            $record_a = dns_get_record($domain, DNS_A);
+
+            if (isset($record_a[0])) {
+                $records[] = $record_a[0]['ip'];
+            } else {
+                throw new DNSLookupException;
+            }
         }
 
         $addresses = [];
