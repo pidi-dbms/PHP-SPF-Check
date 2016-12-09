@@ -60,7 +60,8 @@ class DNSRecordGetter implements DNSRecordGetterInterface
 
     public function resolveMx($domain)
     {
-        $records = dns_get_record($domain, DNS_MX);
+        $records = [];
+        getmxrr($domain, $records);
         if (false === $records || (is_array($records) && empty($records))) {
             throw new DNSLookupException;
         }
