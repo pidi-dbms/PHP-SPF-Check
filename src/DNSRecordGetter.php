@@ -67,9 +67,10 @@ class DNSRecordGetter implements DNSRecordGetterInterface
 
             if (isset($record_a[0])) {
                 $records[] = $record_a[0]['ip'];
-            } else {
-                throw new DNSLookupException;
+                return $records;
             }
+
+            throw new DNSLookupException;
         }
 
         $addresses = [];
